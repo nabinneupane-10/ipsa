@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💖 Open Message</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+<style>
+  :root {
+    --blush: #f7c5d0;
+    --rose: #e8a0b0;
+    --petal: #fde8ee;
+    --cream: #fff9f5;
+    --lavender: #e8d5f0;
+    --soft-purple: #c9b0d8;
+    --gold: #d4a574;
+    --text-dark: #4a3040;
+    --text-mid: #7a5060;
+    --text-light: #a08090;
+    --glass-bg: rgba(255, 245, 250, 0.55);
+    --glass-border: rgba(255, 200, 220, 0.4);
+    --shadow: rgba(180, 100, 130, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    background: #fdf0f5;
+    color: var(--text-dark);
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── LOADING SCREEN ─────────────────────────────────── */
+  #loader {
+    position: fixed; inset: 0; z-index: 9999;
+    background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 40%, #fce4ec 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 24px;
+  }
+
+  .loader-bloom {
+    width: 100px; height: 100px;
+    position: relative;
+    animation: bloom-spin 2s linear infinite;
+  }
+
+  .loader-bloom .petal {
+    position: absolute; width: 36px; height: 52px;
+    background: radial-gradient(ellipse at 50% 30%, #f7b8cc, #e88ca8 70%);
+    border-radius: 50% 50% 45% 45%;
+    transform-origin: 50% 90%;
+    opacity: 0;
+    animation: petal-bloom 1.6s ease forwards;
+  }
+
+  .loader-bloom .petal:nth-child(1) { left: 32px; top: -10px; transform: rotate(0deg); animation-delay: 0s; }
+  .loader-bloom .petal:nth-child(2) { right: -6px; top: 18px; transform: rotate(60deg); animation-delay: 0.1s; }
+  .loader-bloom .petal:nth-child(3) { right: 4px; bottom: 4px; transform: rotate(120deg); animation-delay: 0.2s; }
+  .loader-bloom .petal:nth-child(4) { left: 32px; bottom: -10px; transform: rotate(180deg); animation-delay: 0.3s; }
+  .loader-bloom .petal:nth-child(5) { left: -6px; bottom: 4px; transform: rotate(240deg); animation-delay: 0.4s; }
+  .loader-bloom .petal:nth-child(6) { left: 4px; top: 18px; transform: rotate(300deg); animation-delay: 0.5s; }
+
+  .loader-bloom .center {
+    position: absolute; width: 24px; height: 24px;
+    background: radial-gradient(circle, #ffd3e0, #f4a0bb);
+    border-radius: 50%;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    box-shadow: 0 0 20px rgba(244, 160, 187, 0.6);
+    animation: center-glow 1s ease 0.6s forwards;
+    opacity: 0;
+  }
+
+  @keyframes petal-bloom {
+    0% { opacity: 0; transform-origin: 50% 90%; scale: 0; }
+    60% { opacity: 1; scale: 1.1; }
+    100% { opacity: 1; scale: 1; }
+  }
+
+  @keyframes bloom-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes center-glow {
+    to { opacity: 1; }
+  }
+
+  .loader-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(15px, 4vw, 19px);
+    color: var(--text-mid);
+    font-style: italic;
+    letter-spacing: 0.08em;
+    animation: pulse-text 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse-text {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  .loader-dots { display: flex; gap: 6px; }
+  .loader-dots span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--rose);
+    animation: dot-bounce 1.2s ease-in-out infinite;
+  }
+  .loader-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loader-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes dot-bounce {
+    0%, 100% { transform: translateY(0); opacity: 0.4; }
+    50% { transform: translateY(-8px); opacity: 1; }
+  }
+
+  /* ── BACKGROUND ─────────────────────────────────────── */
+  #bg-layer {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(252, 228, 236, 0.9) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 0%, rgba(240, 220, 255, 0.8) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 100%, rgba(255, 220, 230, 0.7) 0%, transparent 50%),
+      radial-gradient(ellipse at 5% 80%, rgba(253, 240, 245, 0.9) 0%, transparent 40%),
+      linear-gradient(160deg, #fce8ef 0%, #f5e8ff 40%, #fce4ec 70%, #fff0f8 100%);
+    overflow: hidden;
+  }
+
+  .bg-flowers-canvas {
+    position: absolute; inset: 0;
+    overflow: hidden; pointer-events: none;
+  }
+
+  .bg-flower {
+    position: absolute;
+    font-size: clamp(40px, 8vw, 90px);
+    opacity: 0.12;
+    filter: blur(1.5px) saturate(1.2);
+    animation: bg-flower-float linear infinite;
+    user-select: none;
+  }
+
+  @keyframes bg-flower-float {
+    0% { transform: translateY(0) rotate(0deg) scale(1); }
+    33% { transform: translateY(-18px) rotate(8deg) scale(1.04); }
+    66% { transform: translateY(10px) rotate(-5deg) scale(0.97); }
+    100% { transform: translateY(0) rotate(0deg) scale(1); }
+  }
+
+  /* ── FLOATING PETALS ─────────────────────────────────── */
+  #petals-container {
+    position: fixed; inset: 0; z-index: 1;
+    pointer-events: none; overflow: hidden;
+  }
+
+  .falling-petal {
+    position: absolute;
+    top: -40px;
+    font-size: 16px;
+    opacity: 0;
+    animation: petal-fall linear infinite;
+    filter: blur(0.3px);
+  }
+
+  @keyframes petal-fall {
+    0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.7; }
+    90% { opacity: 0.4; }
+    100% { transform: translateY(110vh) translateX(80px) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── PARTICLES ───────────────────────────────────────── */
+  #particles-container {
+    position: fixed; inset: 0; z-index: 1;
+    pointer-events: none;
+  }
+
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 180, 200, 0.8), rgba(255, 200, 220, 0.3));
+    animation: particle-drift ease-in-out infinite;
+  }
+
+  @keyframes particle-drift {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+    25% { transform: translate(15px, -20px) scale(1.2); opacity: 0.6; }
+    50% { transform: translate(-10px, -35px) scale(0.9); opacity: 0.4; }
+    75% { transform: translate(20px, -50px) scale(1.1); opacity: 0.5; }
+  }
+
+  /* ── MAIN WRAPPER ────────────────────────────────────── */
+  #main-content {
+    position: relative; z-index: 2;
+    opacity: 0;
+  }
+
+  /* ── HERO ────────────────────────────────────────────── */
+  #hero {
+    min-height: 100svh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: clamp(60px, 10vw, 100px) 24px 60px;
+    position: relative;
+  }
+
+  .hero-badge {
+    font-size: clamp(13px, 3vw, 14px);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-bottom: 20px;
+    font-weight: 400;
+    opacity: 0;
+    animation: fade-up 0.8s ease 0.3s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(44px, 12vw, 96px);
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--text-dark);
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fade-up 1s ease 0.5s forwards;
+  }
+
+  .hero-title span {
+    background: linear-gradient(135deg, #d4607a, #c060b0, #d4607a);
+    background-size: 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 4s ease infinite;
+  }
+
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .typewriter-wrap {
+    max-width: 500px;
+    min-height: 64px;
+    margin: 0 auto 44px;
+    opacity: 0;
+    animation: fade-up 1s ease 0.8s forwards;
+  }
+
+  .typewriter-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(16px, 4.5vw, 21px);
+    font-style: italic;
+    color: var(--text-mid);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .typewriter-cursor {
+    display: inline-block;
+    width: 2px; height: 1.1em;
+    background: var(--rose);
+    margin-left: 3px;
+    vertical-align: text-bottom;
+    animation: cursor-blink 0.9s step-end infinite;
+  }
+
+  @keyframes cursor-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .open-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center; gap: 10px;
+    padding: 16px 38px;
+    background: linear-gradient(135deg, #e8829a 0%, #c760b0 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-family: 'Jost', sans-serif;
+    font-size: clamp(14px, 3.5vw, 16px);
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(220, 100, 140, 0.35), 0 2px 8px rgba(220, 100, 140, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    opacity: 0;
+    animation: fade-up 1s ease 1.2s forwards;
+  }
+
+  .open-btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .open-btn:hover { transform: translateY(-3px); box-shadow: 0 16px 44px rgba(220, 100, 140, 0.45); }
+  .open-btn:hover::before { opacity: 1; }
+  .open-btn:active { transform: translateY(-1px); }
+
+  .btn-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    pointer-events: none;
+  }
+
+  @keyframes ripple {
+    to { transform: scale(4); opacity: 0; }
+  }
+
+  .scroll-hint {
+    position: absolute; bottom: 28px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column;
+    align-items: center; gap: 8px;
+    opacity: 0;
+    animation: fade-in 1s ease 2s forwards;
+    color: var(--text-light);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+  }
+
+  .scroll-arrow {
+    width: 20px; height: 20px;
+    border-right: 1.5px solid var(--rose);
+    border-bottom: 1.5px solid var(--rose);
+    transform: rotate(45deg);
+    animation: arrow-bounce 1.5s ease-in-out infinite;
+  }
+
+  @keyframes arrow-bounce {
+    0%, 100% { transform: rotate(45deg) translateY(0); }
+    50% { transform: rotate(45deg) translateY(6px); }
+  }
+
+  /* ── MESSAGE SECTION ──────────────────────────────────── */
+  #message-section {
+    padding: clamp(60px, 10vw, 120px) clamp(16px, 5vw, 40px);
+    max-width: 700px;
+    margin: 0 auto;
+    display: none;
+  }
+
+  .section-label {
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-bottom: 16px;
+    font-weight: 400;
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(30px, 7vw, 52px);
+    font-weight: 300;
+    text-align: center;
+    color: var(--text-dark);
+    margin-bottom: 48px;
+    line-height: 1.2;
+  }
+
+  .message-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    border: 1px solid var(--glass-border);
+    border-radius: 28px;
+    padding: clamp(28px, 6vw, 56px) clamp(24px, 5vw, 48px);
+    box-shadow: 0 20px 60px var(--shadow), 0 2px 0 rgba(255,255,255,0.6) inset;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .message-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #e8829a, #c760b0, #9b7fd4, #e8829a);
+    background-size: 200%;
+    animation: gradient-shift 4s linear infinite;
+  }
+
+  .message-card::after {
+    content: '✉';
+    position: absolute;
+    top: 20px; right: 24px;
+    font-size: 22px;
+    opacity: 0.15;
+  }
+
+  .msg-para {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(17px, 4.5vw, 21px);
+    line-height: 1.85;
+    color: var(--text-dark);
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+    font-weight: 300;
+  }
+
+  .msg-para.visible { opacity: 1; transform: translateY(0); }
+
+  .msg-para:first-child {
+    font-size: clamp(19px, 5vw, 24px);
+    font-weight: 400;
+    color: var(--text-mid);
+  }
+
+  .msg-para.signature {
+    font-size: clamp(18px, 4.5vw, 22px);
+    font-style: italic;
+    color: var(--rose);
+    margin-bottom: 0;
+    font-weight: 400;
+  }
+
+  .msg-divider {
+    width: 60px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--rose), transparent);
+    margin: 28px auto;
+    opacity: 0;
+    transition: opacity 0.7s ease;
+  }
+
+  .msg-divider.visible { opacity: 1; }
+
+  /* ── PETAL BURST ─────────────────────────────────────── */
+  .petal-burst {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  .burst-petal {
+    position: absolute;
+    font-size: 18px;
+    animation: burst-fly 1.2s ease-out forwards;
+  }
+
+  @keyframes burst-fly {
+    0% { transform: translate(0,0) scale(0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(1) rotate(var(--rot)); opacity: 0; }
+  }
+
+  /* ── WISHES SECTION ───────────────────────────────────── */
+  #wishes-section {
+    padding: clamp(60px, 10vw, 120px) clamp(16px, 5vw, 40px);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .wishes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 48px;
+  }
+
+  @media (min-width: 640px) {
+    .wishes-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  }
+
+  @media (min-width: 900px) {
+    .wishes-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  .wish-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px) saturate(1.3);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    border: 1px solid var(--glass-border);
+    border-radius: 22px;
+    padding: clamp(20px, 4vw, 32px) 18px;
+    text-align: center;
+    cursor: default;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease;
+    box-shadow: 0 8px 24px var(--shadow);
+    animation: card-float ease-in-out infinite alternate;
+  }
+
+  .wish-card:nth-child(1) { animation-duration: 3.8s; }
+  .wish-card:nth-child(2) { animation-duration: 4.2s; animation-delay: 0.3s; }
+  .wish-card:nth-child(3) { animation-duration: 3.5s; animation-delay: 0.6s; }
+  .wish-card:nth-child(4) { animation-duration: 4.6s; animation-delay: 0.9s; }
+
+  @keyframes card-float {
+    from { transform: translateY(0); }
+    to { transform: translateY(-8px); }
+  }
+
+  .wish-card:hover {
+    transform: translateY(-12px) scale(1.04) !important;
+    box-shadow: 0 24px 50px rgba(220, 100, 140, 0.2), 0 0 0 1px rgba(255,160,190,0.3);
+    animation: none;
+  }
+
+  .wish-emoji { font-size: clamp(28px, 7vw, 40px); margin-bottom: 12px; display: block; }
+
+  .wish-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(14px, 3.5vw, 17px);
+    line-height: 1.5;
+    color: var(--text-dark);
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  /* ── MEMORY GARDEN ────────────────────────────────────── */
+  #garden-section {
+    padding: clamp(60px, 10vw, 120px) clamp(16px, 5vw, 40px);
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .garden-row {
+    display: flex;
+    justify-content: center;
+    gap: clamp(16px, 4vw, 36px);
+    flex-wrap: wrap;
+    margin-top: 48px;
+  }
+
+  .garden-flower {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 10px;
+    cursor: default;
+  }
+
+  .flower-bloom {
+    font-size: clamp(36px, 8vw, 56px);
+    display: block;
+    transform-origin: 50% 90%;
+    animation: sway ease-in-out infinite alternate;
+  }
+
+  .garden-flower:nth-child(1) .flower-bloom { animation-duration: 2.8s; }
+  .garden-flower:nth-child(2) .flower-bloom { animation-duration: 3.2s; animation-delay: 0.3s; }
+  .garden-flower:nth-child(3) .flower-bloom { animation-duration: 2.5s; animation-delay: 0.6s; }
+  .garden-flower:nth-child(4) .flower-bloom { animation-duration: 3.6s; animation-delay: 0.2s; }
+  .garden-flower:nth-child(5) .flower-bloom { animation-duration: 2.9s; animation-delay: 0.8s; }
+
+  @keyframes sway {
+    from { transform: rotate(-6deg); }
+    to { transform: rotate(6deg); }
+  }
+
+  .flower-stem {
+    width: 3px; height: clamp(30px, 6vw, 50px);
+    background: linear-gradient(to bottom, #c8e6c9, #a5d6a7);
+    border-radius: 2px;
+    position: relative;
+  }
+
+  .flower-note {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(12px, 3vw, 15px);
+    color: var(--text-mid);
+    font-style: italic;
+    font-weight: 400;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px var(--shadow);
+  }
+
+  /* ── FOOTER ──────────────────────────────────────────── */
+  #footer {
+    padding: 60px 24px 80px;
+    text-align: center;
+  }
+
+  .footer-flower {
+    font-size: 32px; display: block; margin-bottom: 16px;
+    animation: sway 3s ease-in-out infinite alternate;
+  }
+
+  .footer-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(14px, 4vw, 17px);
+    color: var(--text-light);
+    font-style: italic;
+    line-height: 1.7;
+  }
+
+  /* ── MUSIC BUTTON ────────────────────────────────────── */
+  #music-btn {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    z-index: 1000;
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, rgba(255,245,250,0.9), rgba(252,220,235,0.85));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1.5px solid var(--glass-border);
+    border-radius: 50%;
+    box-shadow: 0 8px 24px var(--shadow);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  #music-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 32px rgba(220, 100, 140, 0.3);
+  }
+
+  #music-btn.playing::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid rgba(232, 130, 154, 0.4);
+    animation: pulse-ring 1.5s ease-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+
+  /* ── SHARED ANIMATIONS ───────────────────────────────── */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-bloom">
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="petal"></div>
+    <div class="center"></div>
+  </div>
+  <p class="loader-text">Preparing a Special Message...</p>
+  <div class="loader-dots">
+    <span></span><span></span><span></span>
+  </div>
+</div>
+
+<!-- BACKGROUND -->
+<div id="bg-layer">
+  <div class="bg-flowers-canvas" id="bg-flowers"></div>
+</div>
+
+<!-- PETALS -->
+<div id="petals-container"></div>
+
+<!-- PARTICLES -->
+<div id="particles-container"></div>
+
+<!-- AUDIO -->
+<audio id="bg-music" loop>
+  <source src="https://www.bensound.com/bensound-music/bensound-memories.mp3" type="audio/mp3">
+  <source src="https://www.bensound.com/bensound-music/bensound-slowmotion.mp3" type="audio/mp3">
+</audio>
+
+<!-- MUSIC BUTTON -->
+<button id="music-btn" title="Toggle music" aria-label="Toggle music">🎵</button>
+
+<!-- MAIN CONTENT -->
+<div id="main-content">
+
+  <!-- HERO -->
+  <section id="hero">
+    <p class="hero-badge">💌 &nbsp;a heartfelt letter&nbsp; 💌</p>
+    <h1 class="hero-title"><span>Open Message</span></h1>
+    <div class="typewriter-wrap">
+      <span class="typewriter-text" id="typewriter-el"></span><span class="typewriter-cursor" id="typewriter-cursor"></span>
+    </div>
+    <button class="open-btn" id="open-btn" onclick="openMessage(event)">
+      💌 &nbsp;Open Message
+    </button>
+    <div class="scroll-hint">
+      <span>scroll</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- MESSAGE -->
+  <section id="message-section">
+    <p class="section-label reveal">✉ &nbsp;a message for you</p>
+    <h2 class="section-title reveal reveal-delay-1">Written with care,<br><em>for you</em></h2>
+    <div class="message-card" id="message-card">
+      <p class="msg-para">Hey,</p>
+      <p class="msg-para">There are some things I've wanted to say.</p>
+      <div class="msg-divider"></div>
+      <p class="msg-para">When I first met you, I noticed your beauty. But what stayed with me was your strength, kindness, and the way you keep moving forward.</p>
+      <p class="msg-para">I know life hasn't always been easy, and I respect your feelings and choices completely.</p>
+      <div class="msg-divider"></div>
+      <p class="msg-para">Thank you for reminding me that genuine connections don't always need labels.</p>
+      <p class="msg-para">Thank you for being yourself.</p>
+      <p class="msg-para">Thank you for showing me that caring about someone can simply mean wishing them happiness, peace, and healing.</p>
+      <div class="msg-divider"></div>
+      <p class="msg-para">Even if friendship is all we ever share, it's something I'll always value.</p>
+      <p class="msg-para">You deserve peace. You deserve happiness. You deserve people who respect and understand you.</p>
+      <div class="msg-divider"></div>
+      <p class="msg-para">No matter where life takes us, I'm grateful our paths crossed.</p>
+      <p class="msg-para">Take care of yourself and keep shining.</p>
+      <p class="msg-para signature">❤️ &nbsp;Your Friend</p>
+    </div>
+  </section>
+
+  <!-- WISHES -->
+  <section id="wishes-section">
+    <p class="section-label reveal">✨ &nbsp;best wishes for you</p>
+    <h2 class="section-title reveal reveal-delay-1">From the heart,<br><em>always</em></h2>
+    <div class="wishes-grid">
+      <div class="wish-card reveal reveal-delay-1">
+        <span class="wish-emoji">🌸</span>
+        <p class="wish-text">May your heart always find peace.</p>
+      </div>
+      <div class="wish-card reveal reveal-delay-2">
+        <span class="wish-emoji">✨</span>
+        <p class="wish-text">May happiness follow you wherever life takes you.</p>
+      </div>
+      <div class="wish-card reveal reveal-delay-3">
+        <span class="wish-emoji">🌷</span>
+        <p class="wish-text">May your dreams become reality.</p>
+      </div>
+      <div class="wish-card reveal reveal-delay-4">
+        <span class="wish-emoji">💖</span>
+        <p class="wish-text">Thank you for being part of my story.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- GARDEN -->
+  <section id="garden-section">
+    <p class="section-label reveal">🌿 &nbsp;memory garden</p>
+    <h2 class="section-title reveal reveal-delay-1">Little reminders,<br><em>just for you</em></h2>
+    <p class="reveal reveal-delay-2" style="font-family:'Cormorant Garamond',serif; font-size:clamp(16px,4vw,19px); font-style:italic; color:var(--text-mid); line-height:1.7; margin-top:-20px; margin-bottom:0;">
+      A garden of gentle thoughts, blooming softly in the breeze.
+    </p>
+    <div class="garden-row">
+      <div class="garden-flower reveal">
+        <span class="flower-bloom">🌸</span>
+        <div class="flower-stem"></div>
+        <div class="flower-note">Stay Strong</div>
+      </div>
+      <div class="garden-flower reveal reveal-delay-1">
+        <span class="flower-bloom">🌷</span>
+        <div class="flower-stem"></div>
+        <div class="flower-note">Keep Smiling</div>
+      </div>
+      <div class="garden-flower reveal reveal-delay-2">
+        <span class="flower-bloom">🌹</span>
+        <div class="flower-stem"></div>
+        <div class="flower-note">Believe In Yourself</div>
+      </div>
+      <div class="garden-flower reveal reveal-delay-3">
+        <span class="flower-bloom">🌺</span>
+        <div class="flower-stem"></div>
+        <div class="flower-note">Keep Growing</div>
+      </div>
+      <div class="garden-flower reveal reveal-delay-4">
+        <span class="flower-bloom">💐</span>
+        <div class="flower-stem"></div>
+        <div class="flower-note">You Matter</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="footer">
+    <span class="footer-flower">🌸</span>
+    <p class="footer-text">
+      "Some goodbyes are simply<br>see you in the petals of spring."<br><br>
+      <span style="font-size:12px; letter-spacing:0.14em; color:var(--rose);">
+        made with love &nbsp;·&nbsp; open message
+      </span>
+    </p>
+  </footer>
+
+</div>
+
+<script>
+// ── UTILITIES ─────────────────────────────────────────────
+function $(id) { return document.getElementById(id); }
+function randomBetween(a, b) { return a + Math.random() * (b - a); }
+
+// ── LOADER ────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const loader = $('loader');
+    loader.style.transition = 'opacity 1s ease, visibility 1s ease';
+    loader.style.opacity = '0';
+    loader.style.visibility = 'hidden';
+    setTimeout(() => {
+      loader.style.display = 'none';
+      const mc = $('main-content');
+      mc.style.transition = 'opacity 0.8s ease';
+      mc.style.opacity = '1';
+      startTypewriter();
+    }, 1000);
+  }, 2200);
+});
+
+// ── BACKGROUND FLOWERS ────────────────────────────────────
+const bgFlowers = document.getElementById('bg-flowers');
+const flowerEmojis = ['🌸','🌺','🌷','🌹','💮','🏵️','🌼','🌻'];
+for (let i = 0; i < 18; i++) {
+  const el = document.createElement('div');
+  el.className = 'bg-flower';
+  el.textContent = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)];
+  el.style.left = randomBetween(0, 95) + '%';
+  el.style.top = randomBetween(-5, 95) + '%';
+  el.style.fontSize = randomBetween(36, 90) + 'px';
+  el.style.animationDuration = randomBetween(6, 14) + 's';
+  el.style.animationDelay = randomBetween(0, 6) + 's';
+  el.style.opacity = randomBetween(0.06, 0.16);
+  bgFlowers.appendChild(el);
+}
+
+// ── FALLING PETALS ────────────────────────────────────────
+const petalsContainer = document.getElementById('petals-container');
+const petalEmojis = ['🌸','🌺','🌷','🌹','✿','❀'];
+function createPetal() {
+  const el = document.createElement('div');
+  el.className = 'falling-petal';
+  el.textContent = petalEmojis[Math.floor(Math.random() * petalEmojis.length)];
+  el.style.left = randomBetween(-2, 100) + '%';
+  el.style.fontSize = randomBetween(10, 20) + 'px';
+  el.style.animationDuration = randomBetween(6, 14) + 's';
+  el.style.animationDelay = randomBetween(0, 3) + 's';
+  petalsContainer.appendChild(el);
+  setTimeout(() => el.remove(), 17000);
+}
+for (let i = 0; i < 12; i++) createPetal();
+setInterval(createPetal, 1800);
+
+// ── PARTICLES ─────────────────────────────────────────────
+const particlesContainer = document.getElementById('particles-container');
+for (let i = 0; i < 28; i++) {
+  const el = document.createElement('div');
+  el.className = 'particle';
+  const size = randomBetween(3, 9);
+  el.style.width = size + 'px';
+  el.style.height = size + 'px';
+  el.style.left = randomBetween(0, 100) + '%';
+  el.style.top = randomBetween(10, 90) + '%';
+  el.style.animationDuration = randomBetween(5, 12) + 's';
+  el.style.animationDelay = randomBetween(0, 8) + 's';
+  particlesContainer.appendChild(el);
+}
+
+// ── TYPEWRITER ────────────────────────────────────────────
+const phrase = "Some people enter our lives and leave a beautiful impact without even realizing it.";
+let tIndex = 0;
+function startTypewriter() {
+  const el = $('typewriter-el');
+  if (!el) return;
+  function type() {
+    if (tIndex < phrase.length) {
+      el.textContent += phrase[tIndex++];
+      setTimeout(type, randomBetween(38, 72));
+    } else {
+      $('typewriter-cursor').style.display = 'none';
+    }
+  }
+  setTimeout(type, 600);
+}
+
+// ── PETAL BURST ───────────────────────────────────────────
+function petalBurst(cx, cy) {
+  const burst = document.createElement('div');
+  burst.className = 'petal-burst';
+  burst.style.left = cx + 'px';
+  burst.style.top = cy + 'px';
+  document.body.appendChild(burst);
+  const symbols = ['🌸','🌷','🌺','✿','❀','🌹'];
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement('div');
+    p.className = 'burst-petal';
+    p.textContent = symbols[i % symbols.length];
+    const angle = (i / 14) * 360;
+    const dist = randomBetween(60, 150);
+    const rad = angle * Math.PI / 180;
+    p.style.setProperty('--tx', (Math.cos(rad) * dist) + 'px');
+    p.style.setProperty('--ty', (Math.sin(rad) * dist) + 'px');
+    p.style.setProperty('--rot', randomBetween(-360, 360) + 'deg');
+    p.style.animationDelay = randomBetween(0, 0.2) + 's';
+    burst.appendChild(p);
+  }
+  setTimeout(() => burst.remove(), 1500);
+}
+
+// ── OPEN MESSAGE ──────────────────────────────────────────
+function openMessage(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  petalBurst(cx, cy);
+
+  // ripple
+  const ripple = document.createElement('span');
+  ripple.className = 'btn-ripple';
+  ripple.style.width = ripple.style.height = '200px';
+  ripple.style.left = (e.clientX - rect.left - 100) + 'px';
+  ripple.style.top = (e.clientY - rect.top - 100) + 'px';
+  e.currentTarget.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 700);
+
+  const msgSection = $('message-section');
+  msgSection.style.display = 'block';
+  msgSection.style.opacity = '0';
+  msgSection.style.transform = 'translateY(30px)';
+  msgSection.style.transition = 'opacity 0.9s ease, transform 0.9s ease';
+
+  setTimeout(() => {
+    msgSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => {
+      msgSection.style.opacity = '1';
+      msgSection.style.transform = 'translateY(0)';
+      animateMessageParagraphs();
+    }, 400);
+  }, 300);
+
+  // start music on interaction
+  tryPlayMusic();
+}
+
+function animateMessageParagraphs() {
+  const paras = document.querySelectorAll('.msg-para, .msg-divider');
+  paras.forEach((p, i) => {
+    setTimeout(() => {
+      p.classList.add('visible');
+    }, i * 180);
+  });
+}
+
+// ── SCROLL REVEAL ─────────────────────────────────────────
+function checkReveal() {
+  const reveals = document.querySelectorAll('.reveal');
+  const windowH = window.innerHeight;
+  reveals.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < windowH * 0.88) el.classList.add('visible');
+  });
+}
+
+window.addEventListener('scroll', checkReveal, { passive: true });
+setTimeout(checkReveal, 2400);
+
+// ── PARALLAX ──────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  const bgLayer = document.getElementById('bg-layer');
+  if (bgLayer) bgLayer.style.transform = `translateY(${scrollY * 0.25}px)`;
+}, { passive: true });
+
+// ── MUSIC ─────────────────────────────────────────────────
+const music = $('bg-music');
+const musicBtn = $('music-btn');
+let musicStarted = false;
+
+music.volume = 0.25;
+
+function tryPlayMusic() {
+  if (musicStarted) return;
+  music.play().then(() => {
+    musicStarted = true;
+    musicBtn.classList.add('playing');
+    musicBtn.textContent = '🎵';
+  }).catch(() => {});
+}
+
+// Try autoplay
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => tryPlayMusic(), 3000);
+});
+
+// First interaction fallback
+['click','touchstart','keydown','scroll'].forEach(ev => {
+  document.addEventListener(ev, () => tryPlayMusic(), { once: true, passive: true });
+});
+
+musicBtn.addEventListener('click', () => {
+  if (music.paused) {
+    music.play();
+    musicBtn.classList.add('playing');
+    musicBtn.textContent = '🎵';
+    musicStarted = true;
+  } else {
+    music.pause();
+    musicBtn.classList.remove('playing');
+    musicBtn.textContent = '🔇';
+  }
+});
+
+// ── GSAP SCROLL ANIMATIONS ────────────────────────────────
+if (typeof gsap !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Section titles stagger
+  gsap.utils.toArray('.section-title').forEach(el => {
+    gsap.from(el, {
+      opacity: 0, y: 30, duration: 1, ease: 'power2.out',
+      scrollTrigger: { trigger: el, start: 'top 85%' }
+    });
+  });
+
+  // Garden flowers
+  gsap.utils.toArray('.garden-flower').forEach((el, i) => {
+    gsap.from(el, {
+      opacity: 0, y: 40, scale: 0.8, duration: 0.8, ease: 'back.out(1.4)',
+      delay: i * 0.1,
+      scrollTrigger: { trigger: el, start: 'top 90%' }
+    });
+  });
+}
+</script>
+</body>
+</html>
